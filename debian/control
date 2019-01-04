@@ -3,6 +3,7 @@ Priority: optional
 Maintainer: Scarlett Moore <sgclark@kde.org>
 Build-Depends: debhelper (>= 11),
   cmake,
+  desktop-file-utils,
   libarchive-dev,
   libcairo2-dev,
   libglib2.0-dev,
