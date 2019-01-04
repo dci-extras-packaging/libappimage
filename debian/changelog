@@ -1,0 +1,5 @@
+libappimage (0.1.1-1) unstable; urgency=medium
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Scarlett Moore <sgclark@kde.org>  Sat, 13 Oct 2018 15:55:53 -0700
