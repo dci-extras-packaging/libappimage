@@ -28,7 +28,7 @@ License: GPL-2+
 Files: src/libappimage_hashlib/*
 Copyright: Alexander Peslyak
                   2013 waterjuice.org
-License: Public Domain
+License: public-domain
  This is free and unencumbered software released into the public domain.
 
 Files: src/libappimage_shared/*
