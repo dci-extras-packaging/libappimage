@@ -50,6 +50,7 @@
 
 // own header
 #include "appimage/appimage.h"
+#include "desktop_integration.h"
 #include "type1.h"
 
 #if HAVE_LIBARCHIVE3 == 1 // CentOS
@@ -70,21 +71,6 @@
 #define URI_MAX (FILE_MAX * 3 + 8)
 
 char *vendorprefix = "appimagekit";
-
-void set_executable(const char *path, gboolean verbose)
-{
-    if(!g_find_program_in_path ("firejail")){
-        int result = chmod(path, 0755); // TODO: Only do this if signature verification passed
-        if(result != 0){
-#ifdef STANDALONE
-            fprintf(stderr, "Could not set %s executable: %s\n", path, strerror(errno));
-#endif
-        } else {
-            if(verbose)
-                fprintf(stderr, "Set %s executable\n", path);
-        }
-    }
-}
 
 /* Search and replace on a string, this really should be in Glib */
 gchar* replace_str(const gchar const *src, const gchar const *find, const gchar const *replace){
@@ -397,48 +383,215 @@ gchar **squash_get_matching_files_install_icons_and_mime_data(sqfs* fs, char* pa
     return (gchar **) g_ptr_array_free(array, FALSE);
 }
 
-/* Loads a desktop file from squashfs into an empty GKeyFile structure.
- * FIXME: Use sqfs_lookup_path() instead of g_key_file_load_from_squash()
- * should help for performance. Please submit a pull request if you can
- * get it to work.
+
+
+/**
+ * Lookup a given <path> in <fs>. If the path points to a symlink it is followed until a regular file is found.
+ * This method is aware of symlink loops and will fail properly in such case.
+ * @param fs
+ * @param path
+ * @param inode [RETURN PARAMETER] will be filled with a regular file inode. It cannot be NULL
+ * @return succeed true if the file is found, otherwise false
  */
-gboolean g_key_file_load_from_squash(sqfs *fs, char *path, GKeyFile *key_file_structure, gboolean verbose) {
-    sqfs_traverse trv;
-    gboolean success = true;
-    sqfs_err err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs));
+bool sqfs_lookup_path_resolving_symlinks(sqfs* fs, char* path, sqfs_inode* inode) {
+    g_assert(fs != NULL);
+    g_assert(inode != NULL);
+
+    bool found = false;
+    sqfs_inode root_inode;
+    sqfs_err err = sqfs_inode_get(fs, &root_inode, fs->sb.root_inode);
     if (err != SQFS_OK) {
-        fprintf(stderr, "sqfs_traverse_open error\n");
+#ifdef STANDALONE
+        g_warning("sqfs_inode_get root inode error\n");
+#endif
         return false;
     }
-    while (sqfs_traverse_next(&trv, &err)) {
-        if (!trv.dir_end) {
-            if (strcmp(path, trv.path) == 0){
-                sqfs_inode inode;
-                if (sqfs_inode_get(fs, &inode, trv.entry.inode))
-                    fprintf(stderr, "sqfs_inode_get error\n");
-                if (inode.base.inode_type == SQUASHFS_REG_TYPE){
-                    off_t bytes_already_read = 0;
-                    sqfs_off_t max_bytes_to_read = 256*1024;
-                    char buf[max_bytes_to_read];
-                    if (sqfs_read_range(fs, &inode, (sqfs_off_t) bytes_already_read, &max_bytes_to_read, buf))
-                        fprintf(stderr, "sqfs_read_range error\n");
-                    // fwrite(buf, 1, max_bytes_to_read, stdout);
-                    success = g_key_file_load_from_data (key_file_structure, buf, max_bytes_to_read, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
-                } else {
+
+    *inode = root_inode;
+    err = sqfs_lookup_path(fs, inode, path, &found);
+
+    if (!found) {
 #ifdef STANDALONE
-                    fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
+        g_warning("sqfs_lookup_path path not found: %s\n", path);
 #endif
-                }
-                break;
+        return false;
+    }
+
+    if (err != SQFS_OK) {
+#ifdef STANDALONE
+        g_warning("sqfs_lookup_path error: %s\n", path);
+#endif
+
+        return false;
+    }
+
+    // Save visited inode numbers to prevent loops
+    GSList* inodes_visited = g_slist_append(NULL, (gpointer) inode->base.inode_number);
+
+    while (inode->base.inode_type == SQUASHFS_SYMLINK_TYPE || inode->base.inode_type == SQUASHFS_LSYMLINK_TYPE) {
+        // Read symlink
+        size_t size;
+        // read twice, once to find out right amount of memory to allocate
+        err = sqfs_readlink(fs, inode, NULL, &size);
+        if (err != SQFS_OK) {
+#ifdef STANDALONE
+            fprintf(stderr, "sqfs_readlink error: %s\n", path);
+#endif
+            g_slist_free(inodes_visited);
+            return false;
+        }
+
+        char symlink_target_path[size];
+        // then to populate the buffer
+        err = sqfs_readlink(fs, inode, symlink_target_path, &size);
+        if (err != SQFS_OK) {
+#ifdef STANDALONE
+            g_warning("sqfs_readlink error: %s\n", path);
+#endif
+            g_slist_free(inodes_visited);
+            return false;
+        }
+
+        // lookup symlink target path
+        *inode = root_inode;
+        err = sqfs_lookup_path(fs, inode, symlink_target_path, &found);
+
+        if (!found) {
+#ifdef STANDALONE
+            g_warning("sqfs_lookup_path path not found: %s\n", symlink_target_path);
+#endif
+            g_slist_free(inodes_visited);
+            return false;
+        }
+
+        if (err != SQFS_OK) {
+#ifdef  STANDALONE
+            g_warning("sqfs_lookup_path error: %s\n", symlink_target_path);
+#endif
+            g_slist_free(inodes_visited);
+            return false;
+        }
+
+        // check if we felt into a loop
+        if (g_slist_find(inodes_visited, (gconstpointer) inode->base.inode_number)) {
+#ifdef STANDALONE
+            g_warning("Symlinks loop found while trying to resolve: %s", path);
+#endif
+            g_slist_free(inodes_visited);
+            return false;
+        } else
+            inodes_visited = g_slist_append(inodes_visited, (gpointer) inode->base.inode_number);
+    }
+
+    g_slist_free(inodes_visited);
+    return true;
+}
+
+/**
+ * Read a regular <inode> from <fs> in chunks of <buf_size> and merge them into one.
+ *
+ * @param fs
+ * @param inode
+ * @param buffer [RETURN PARAMETER]
+ * @param buffer_size [RETURN PARAMETER]
+ * @return succeed true, buffer pointing to the memory, buffer_size holding the actual size in memory
+ *          if all was ok. Otherwise succeed false, buffer pointing NULL and buffer_size = 0.
+ *          The buffer MUST BE FREED using g_free().
+ */
+bool sqfs_read_regular_inode(sqfs* fs, sqfs_inode *inode, char **buffer, off_t *buffer_size) {
+    GSList *blocks = NULL;
+
+    off_t bytes_already_read = 0;
+    unsigned long read_buf_size = 256*1024;
+
+    // This has a double role in sqfs_read_range it's used to set the max_bytes_to_be_read and
+    // after complete it's set to the number ob bytes actually read.
+    sqfs_off_t size = 0;
+    sqfs_err err;
+
+    // Read chunks until the end of the file.
+    do {
+        size = read_buf_size;
+        char* buf_read = malloc(sizeof(char) * size);
+        if (buf_read != NULL) {
+            err = sqfs_read_range(fs, inode, (sqfs_off_t) bytes_already_read, &size, buf_read);
+            if (err != SQFS_OK) {
+#ifdef STANDALONE
+                g_warning("sqfs_read_range failed\n");
+#endif
             }
+            else
+                blocks = g_slist_append(blocks, buf_read);
+            bytes_already_read += size;
+        } else { // handle not enough memory properly
+#ifdef STANDALONE
+            g_warning("sqfs_read_regular_inode: Unable to allocate enough memory.\n");
+#endif
+            err = SQFS_ERR;
+        }
+    } while ( (err == SQFS_OK) && (size == read_buf_size) );
+
+
+    bool succeed = false;
+    *buffer_size = 0;
+    *buffer = NULL;
+
+    if (err == SQFS_OK) {
+        // Put all the memory blocks together
+        guint length = g_slist_length(blocks);
+
+        *buffer = malloc(sizeof(char) * bytes_already_read);
+        if (*buffer != NULL) { // Prevent crash if the
+            GSList *ptr = blocks;
+            for (int i = 0; i < (length-1); i ++) {
+                memcpy(*buffer + (i*read_buf_size), ptr->data, read_buf_size);
+                ptr = ptr->next;
+            }
+
+            memcpy(*buffer + ((length-1)*read_buf_size), ptr->data, (size_t) size);
+
+            succeed = true;
+            *buffer_size = bytes_already_read;
+        } else { // handle not enough memory properly
+#ifdef STANDALONE
+            g_warning("sqfs_read_regular_inode: Unable to allocate enough memory.\n");
+#endif
+            succeed = false;
         }
     }
 
-#ifdef STANDALONE
-    if (err)
-        fprintf(stderr, "sqfs_traverse_next error\n");
-#endif
-    sqfs_traverse_close(&trv);
+    g_slist_free_full(blocks, &g_free);
+    return  succeed;
+}
+
+/**
+ * Loads a desktop file from <fs> into an empty GKeyFile structure. In case of symlinks they are followed.
+ * This function is capable of detecting loops and will return false in such cases.
+ *
+ * @param fs
+ * @param path
+ * @param key_file_structure [OUTPUT PARAMETER]
+ * @param verbose
+ * @return true if all when ok, otherwise false.
+ */
+gboolean g_key_file_load_from_squash(sqfs* fs, char* path, GKeyFile* key_file_structure, gboolean verbose) {
+    sqfs_inode inode;
+    if (!sqfs_lookup_path_resolving_symlinks(fs, path, &inode))
+        return false;
+
+    gboolean success = false;
+    if (inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE ) {
+        char* buf = NULL;
+        off_t buf_size;
+        sqfs_read_regular_inode(fs, &inode, &buf, &buf_size);
+        if (buf != NULL) {
+            success = g_key_file_load_from_data(key_file_structure, buf, (gsize) buf_size,
+                                                G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
+
+            g_free(buf);
+        } else
+            success = false;
+    }
 
     return success;
 }
@@ -993,260 +1146,12 @@ bool appimage_type1_get_desktop_filename_and_key_file(struct archive** a, gchar*
     return false;
 }
 
-bool archive_copy_icons_recursively_to_destination(struct archive** a, const gchar* md5,
-                                                   const gchar* desktop_icon_value_original, gboolean verbose) {
-    // iterate over all files ("entries") in the archive
-    // looking for a file with .desktop extension in the root directory
-    struct archive_entry* entry;
-    gchar* filename = NULL;
-
-    bool errored = false;
-
-    for (;;) {
-        int r = archive_read_next_header(*a, &entry);
-
-        if (r == ARCHIVE_EOF) {
-            break;
-        }
-
-        if (r != ARCHIVE_OK) {
-            fprintf(stderr, "%s\n", archive_error_string(*a));
-
-            errored = true;
-            break;
-        }
-
-        /* Skip all but regular files; FIXME: Also handle symlinks correctly */
-        if (archive_entry_filetype(entry) != AE_IFREG)
-            continue;
-
-        filename = replace_str(archive_entry_pathname(entry), "./", "");
-
-        gchar* dest = NULL;
-
-        // Get icon file(s) and MIME types and act on them in one go
-
-        // add vendor prefix (and MD5 hash as an identifier for future operations)
-        if (g_str_has_prefix(filename, "usr/share/icons/")
-            || g_str_has_prefix(filename, "usr/share/pixmaps/")
-            || (g_str_has_prefix(filename, "usr/share/mime/") && g_str_has_suffix(filename, ".xml"))
-            ) {
-
-            gchar* dest_path = replace_str(filename, "usr/share", xdg_data_home());
-            gchar* dest_dirname = g_path_get_dirname(dest_path);
-            g_free(dest_path);
-
-            gchar* file_basename = g_path_get_basename(filename);
-            gchar* dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, file_basename);
-            g_free(file_basename);
-
-            dest = g_build_path("/", dest_dirname, dest_basename, NULL);
-
-            g_free(dest_basename);
-            g_free(dest_dirname);
-        }
-
-        // According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
-        // share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE
-        if (g_str_has_prefix(filename, "usr/share/pixmaps/")) {
-            // clean up dest in case it has been set before
-            g_free(dest);
-
-            // TODO: avoid cluttering /tmp too much
-            dest = g_build_path("/", "/tmp", NULL);
-        }
-
-        if (desktop_icon_value_original != NULL) {
-            if (g_str_has_prefix(filename, desktop_icon_value_original) && !strstr(filename, "/") && (g_str_has_suffix(filename, ".png") || g_str_has_suffix(filename, ".xpm") || g_str_has_suffix(filename, ".svg") || g_str_has_suffix(filename, ".svgz"))) {
-                gchar* file_extension = get_file_extension(filename);
-                gchar* dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original,
-                    file_extension);
-                g_free(file_extension);
-
-                // clean up dest in case it has been set before
-                g_free(dest);
-
-                // TODO: avoid cluttering /tmp too much
-                dest = g_build_path("/", "/tmp", dest_basename, NULL);
-
-                g_free(dest_basename);
-            }
-        }
-
-        // cleanup
-        g_free(filename);
-
-        if (dest != NULL && strlen(dest) <= 0) {
-            if (verbose)
-                fprintf(stderr, "install: %s\n", dest);
-
-            gchar* dir_name = g_path_get_dirname(dest);
-
-            if (g_mkdir_with_parents(dir_name, 0755)) {
-                fprintf(stderr, "Could not create directory: %s\n", dir_name);
-
-                // cleanup
-                g_free(dir_name);
-
-                errored = true;
-                break;
-            }
-
-            g_free(dir_name);
-
-            FILE *f = fopen(dest, "w+");
-
-            if (f == NULL) {
-                int error = errno;
-#ifdef STANDALONE
-                fprintf(stderr, "Could not open file %s for writing: %s\n", dest, strerror(error));
-#endif
-
-                // cleanup
-                g_free(dest);
-
-                errored = true;
-                break;
-            }
-
-            const void* buff;
-
-            size_t size;
-            int64_t offset;
-
-            for (;;) {
-                r = archive_read_data_block(*a, &buff, &size, &offset);
-
-                if (r == ARCHIVE_EOF)
-                    break;
-
-                if (r != ARCHIVE_OK) {
-#ifdef STANDALONE
-                    fprintf(stderr, "%s\n", archive_error_string(*a));
-#endif
-                    break;
-                }
-
-                if (fwrite(buff, 1, size, f) != size) {
-#ifdef STANDALONE
-                    int error = errno;
-                    fprintf(stderr, "Failed to copy icon: %s\n", strerror(error));
-#endif
-                    errored = true;
-                    break;
-                }
-            }
-
-            fclose(f);
-            chmod(dest, 0644);
-
-            if (verbose && !errored) {
-                fprintf(stderr, "Installed: %s\n", dest);
-            }
-
-            if (!errored && g_str_has_prefix(dest, "/tmp")) {
-                move_icon_to_destination(dest, verbose);
-            }
-
-            g_free(dest);
-
-            if (errored)
-                break;
-        }
-    }
-
-    return !errored;
-}
-
-/* Register a type 1 AppImage in the system */
+/* Register a type 1 AppImage in the system
+ * DEPRECATED, it should be removed ASAP
+ * */
 bool appimage_type1_register_in_system(const char *path, bool verbose)
 {
-#ifdef STANDALONE
-    fprintf(stderr, "ISO9660 based type 1 AppImage\n");
-#endif
-    gchar *desktop_icon_value_original = NULL;
-
-    char *md5 = appimage_get_md5(path);
-
-    if(verbose)
-        fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
-
-    // open ISO9660 image using libarchive
-    struct archive *a = archive_read_new();
-    archive_read_support_format_iso9660(a);
-
-    // libarchive status int -- passed to called functions
-    int r;
-
-    // use global bool to not have duplicate cleanup code in the following calls
-    // all if() checks need to be prefixed with "!errored &&" therefore, and on error need to set errored to true
-    // this would be _by far_ less complex code in C++, where lambdas and strings and other nice things exist...
-    bool errored = false;
-
-    if ((r = archive_read_open_filename(a, path, 10240)) != ARCHIVE_OK) {
-#ifdef STANDALONE
-        fprintf(stderr, "%s\n", archive_error_string(a));
-#endif
-        errored = true;
-    }
-    // search image for root desktop file, and read it into key file structure so it can be edited eventually
-    gchar *desktop_filename = NULL;
-    GKeyFile *key_file = NULL;
-
-    if (!errored && !appimage_type1_get_desktop_filename_and_key_file(&a, &desktop_filename, &key_file)) {
-        errored = true;
-    }
-
-    // validate that both have been set to a non-NULL value
-    if (desktop_filename == NULL || key_file == NULL) {
-        errored = true;
-    }
-
-    if (!errored) {
-        desktop_icon_value_original = g_key_file_get_string(key_file, "Desktop Entry", "Icon", NULL);
-
-        if (verbose)
-            fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
-
-        if (!write_edited_desktop_file(key_file, path, desktop_filename, 1, md5, verbose)) {
-#ifdef STANDALONE
-            fprintf(stderr, "Failed to install desktop file\n");
-#endif
-            errored = true;
-        }
-    }
-
-    // next step: copy icons recursively to their target destination
-
-    // reopen ISO9660 image
-    // TODO: merge both steps (reading desktop file and copying icons) again to not have to read the ISO file twice
-    if (!errored) {
-        // close and reopen archive
-        archive_read_free(a);
-
-        a = archive_read_new();
-        archive_read_support_format_iso9660(a);
-
-        if ((r = archive_read_open_filename(a, path, 10240)) != ARCHIVE_OK) {
-#ifdef STANDALONE
-            fprintf(stderr, "archive error: %s\n", archive_error_string(a));
-#endif
-            errored = true;
-        } else {
-            if (!archive_copy_icons_recursively_to_destination(&a, md5, desktop_icon_value_original, verbose)) {
-                errored = true;
-            }
-        }
-    }
-
-    // cleanup
-    g_free(desktop_filename);
-    g_free(desktop_icon_value_original);
-    g_free(md5);
-    g_key_file_free(key_file);
-    archive_read_free(a);
-
-    return !errored;
+    return appimage_register_in_system(path, verbose) == 0;
 }
 
 bool appimage_type2_get_desktop_filename_and_key_file(sqfs* fs, gchar** desktop_filename, gchar* md5, GKeyFile** key_file, gboolean verbose) {
@@ -1278,91 +1183,11 @@ bool appimage_type2_get_desktop_filename_and_key_file(sqfs* fs, gchar** desktop_
     return !errored;
 }
 
-/* Register a type 2 AppImage in the system */
+/* Register a type 2 AppImage in the system
+ * DEPRECATED it should be removed ASAP
+ * */
 bool appimage_type2_register_in_system(const char *path, bool verbose) {
-#ifdef STANDALONE
-    fprintf(stderr, "squashfs based type 2 AppImage\n");
-#endif
-
-    // the offset at which a squashfs image is expected
-    char* md5 = appimage_get_md5(path);
-
-    // a structure that will hold the information from the desktop file
-    GKeyFile* key_file = g_key_file_new();
-    // FIXME: otherwise the regex does weird stuff in the first run
-    gchar* desktop_icon_value_original = "iDoNotMatchARegex";
-
-    if (verbose)
-        fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
-
-    ssize_t fs_offset = appimage_get_elf_size(path);
-
-    if (fs_offset < 0) {
-        if (verbose)
-            fprintf(stderr, "failed to read fs_offset\n");
-        return false;
-    }
-
-    if (verbose)
-        fprintf(stderr, "fs_offset: %lu\n", fs_offset);
-
-    sqfs fs;
-
-    sqfs_err err = sqfs_open_image(&fs, path, (size_t) fs_offset);
-
-    if (err != SQFS_OK) {
-        sqfs_destroy(&fs);
-#ifdef STANDALONE
-        fprintf(stderr, "sqfs_open_image error: %s\n", path);
-#endif
-        return FALSE;
-    } else {
-        if (verbose)
-            fprintf(stderr, "sqfs_open_image: %s\n", path);
-    }
-
-    gchar* desktop_filename = NULL;
-
-    bool errored = false;
-
-    if (appimage_type2_get_desktop_filename_and_key_file(&fs, &desktop_filename, md5, &key_file, verbose)) {
-        desktop_icon_value_original = g_key_file_get_value(key_file, "Desktop Entry", "Icon", NULL);
-
-        if (desktop_icon_value_original == NULL) {
-            errored = true;
-        } else {
-            if (verbose)
-                fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
-            if (!write_edited_desktop_file(key_file, path, desktop_filename, 2, md5, verbose)) {
-#ifdef STANDALONE
-                fprintf(stderr, "Failed to install desktop file\n");
-#endif
-                return false;
-            }
-        }
-    } else {
-        errored = true;
-    }
-
-    if (!errored) {
-        /* Get relevant file(s) */
-        static char* const pattern = "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$|^[^/]*?.(png|svg|svgz|xpm)$)";
-
-        gchar** str_array2 = squash_get_matching_files_install_icons_and_mime_data(&fs, pattern, desktop_icon_value_original, md5, verbose);
-
-        /* Free the NULL-terminated array of strings and its contents */
-        g_strfreev(str_array2);
-    }
-
-    /* The above also gets AppStream metainfo file(s), TODO: Check if the id matches and do something with them*/
-    set_executable(path, verbose);
-
-    g_free(desktop_filename);
-    sqfs_destroy(&fs);
-
-    g_free(md5);
-    g_free(desktop_icon_value_original);
-    return TRUE;
+    return appimage_register_in_system(path, verbose) == 0;
 }
 
 int appimage_type1_is_terminal_app(const char* path) {
@@ -1820,47 +1645,53 @@ bool appimage_is_registered_in_system(const char* path) {
  * Register an AppImage in the system
  * Returns 0 on success, non-0 otherwise.
  */
-int appimage_register_in_system(const char *path, bool verbose)
-{
-    if((g_str_has_suffix(path, ".part")) ||
+int appimage_register_in_system(const char* path, bool verbose) {
+    if ((g_str_has_suffix(path, ".part")) ||
         g_str_has_suffix(path, ".tmp") ||
         g_str_has_suffix(path, ".download") ||
         g_str_has_suffix(path, ".zs-old") ||
         g_str_has_suffix(path, ".~")
-    ) {
+        ) {
         return 1;
     }
 
     int type = appimage_get_type(path, verbose);
+    bool succeed = true;
 
-    if(type != -1) {
+    if (type != -1) {
 #ifdef STANDALONE
         fprintf(stderr, "\n-> Registering type %d AppImage: %s\n", type, path);
 #endif
         appimage_create_thumbnail(path, false);
+
+        char* temp_dir = desktop_integration_create_tempdir();
+        char* md5 = appimage_get_md5(path);
+        char* data_home = xdg_data_home();
+
+        // Files are extracted to a temporary dir to avoid several traversals on the AppImage file
+        // Also, they need to be edited by us anyway, and to avoid confusing desktop environments with
+        // too many different desktop files, we edit them beforehand and move them into their target
+        // destination afterwards only.
+        // (Yes, it _could_ probably be done without tempfiles, but given the amount of desktop registrations,
+        // we consider the file I/O overhead to be acceptable.)
+        desktop_integration_extract_relevant_files(path, temp_dir);
+        succeed = succeed && desktop_integration_modify_desktop_file(path, temp_dir, md5);
+        succeed = succeed && desktop_integration_move_files_to_user_data_dir(temp_dir, data_home, md5);
+        desktop_integration_remove_tempdir(temp_dir);
+
+        free(data_home);
+        free(md5);
+        free(temp_dir);
     } else {
+#ifdef STANDALONE
+        fprintf(stderr, "Error: unknown AppImage type %d\n", type);
+#endif
         if (verbose)
             fprintf(stderr, "-> Skipping file %s\n", path);
         return 0;
     }
 
-    switch (type) {
-        case 1:
-            if (!appimage_type1_register_in_system(path, verbose))
-                return 1;
-            break;
-        case 2:
-            if (!appimage_type2_register_in_system(path, verbose))
-                return 1;
-            break;
-        default:
-#ifdef STANDALONE
-            fprintf(stderr, "Error: unknown AppImage type %d\n", type);
-#endif
-            return 1;
-    }
-
-    return 0;
+    return succeed ? 0 : 1;
 }
 
 /* Delete the thumbnail for a given file and size if it exists */
@@ -1943,8 +1774,9 @@ int appimage_unregister_in_system(const char *path, bool verbose)
     return 0;
 }
 
-void move_file(const char *source, const char *target) {
+bool move_file(const char* source, const char* target) {
     g_type_init();
+    bool succeed = true;
     GError *error = NULL;
     GFile *icon_file = g_file_new_for_path(source);
     GFile *target_file = g_file_new_for_path(target);
@@ -1952,11 +1784,14 @@ void move_file(const char *source, const char *target) {
 #ifdef STANDALONE
         fprintf(stderr, "Error moving file: %s\n", error->message);
 #endif
+        succeed = false;
         g_clear_error (&error);
     }
 
     g_object_unref(icon_file);
     g_object_unref(target_file);
+
+    return succeed;
 }
 
 struct extract_appimage_file_command_data {

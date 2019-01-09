@@ -10,6 +10,8 @@ set(libappimage_sources
     appimage_handler.c
     type1.c
     type2.c
+    desktop_integration.h
+    desktop_integration.c
 )
 
 add_library(libappimage SHARED ${libappimage_sources} appimage_handler.h)
@@ -21,7 +23,10 @@ foreach(target libappimage libappimage_static)
     set_target_properties(${target} PROPERTIES PREFIX "")
 
     target_compile_definitions(${target}
+        # Support Large Files
         PRIVATE -D_FILE_OFFSET_BITS=64
+        PRIVATE -D_LARGEFILE_SOURCE
+
         PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
         PRIVATE -DENABLE_BINRELOC
     )
@@ -36,7 +41,7 @@ foreach(target libappimage libappimage_static)
         PRIVATE xdg-basedir
         # not linking publicly to squashfuse as headers are not needed when using libappimage
         # unit tests etc., which use squashfuse directly, must link to it explicitly
-        PRIVATE squashfuse
+        PRIVATE libsquashfuse
         PRIVATE xz
         PUBLIC libappimage_shared
         PUBLIC pthread
@@ -48,14 +53,17 @@ foreach(target libappimage libappimage_static)
     )
 
     set_property(TARGET libappimage PROPERTY PUBLIC_HEADER ${libappimage_public_header})
+
+    set_property(TARGET libappimage PROPERTY VERSION ${V_MAJOR}.${V_MINOR}.${V_PATCH})
+    set_property(TARGET libappimage PROPERTY SOVERSION ${V_MAJOR})
 endforeach()
 
 # install libappimage
 install(TARGETS libappimage
     EXPORT libappimageTargets
-    LIBRARY DESTINATION lib COMPONENT libappimage
-    ARCHIVE DESTINATION lib/static COMPONENT libappimage
-    PUBLIC_HEADER DESTINATION include/appimage COMPONENT libappimage-dev
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libappimage
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libappimage
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/appimage COMPONENT libappimage-dev
 )
 
 # Add all targets to the build-tree export set
