@@ -22,7 +22,7 @@ Section: libdevel
 Architecture: any
 Multi-Arch: same
 Depends: libappimage0 (= ${binary:Version}), ${misc:Depends}
-Description: Development files for libappimage.
+Description: Development files for libappimage
  Core library of the AppImage project. Reference implementation
  of the AppImage specification. https://appimage.org
  .
@@ -32,7 +32,7 @@ Package: libappimage0
 Architecture: any
 Multi-Arch: same
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Description: Core library for appimage.
+Description: Core library for appimage
  Core library of the AppImage project. Reference implementation
  of the AppImage specification. https://appimage.org
  .
