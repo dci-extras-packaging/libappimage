@@ -1,5 +1,5 @@
 libappimage (0.1.6-1) unstable; urgency=medium
 
-  * Initial release (Closes: #912287) 
+  * Initial release. (Closes: #912287)
 
  -- Scarlett Moore <sgclark@kde.org>  Sat, 13 Oct 2018 15:55:53 -0700
