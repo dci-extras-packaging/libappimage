@@ -1,4 +1,4 @@
-libappimage (0.1.6-1) unstable; urgency=medium
+libappimage (0.1.7+dfsg-1) unstable; urgency=medium
 
   * Initial release. (Closes: #912287)
 
