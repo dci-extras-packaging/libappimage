@@ -2,7 +2,7 @@ Source: libappimage
 Priority: optional
 Maintainer: Scarlett Moore <sgclark@kde.org>
 Build-Depends: cmake,
-               debhelper (>= 11),
+               debhelper (>= 12),
                desktop-file-utils,
                libarchive-dev,
                libcairo2-dev,
