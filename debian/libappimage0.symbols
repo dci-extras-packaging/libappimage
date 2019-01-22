@@ -78,10 +78,12 @@ libappimage.so.0 libappimage0 #MINVER#
  squash_get_matching_files_install_icons_and_mime_data@Base 0.1.6
  traverse_handler_extract_relevant_desktop_integration_files@Base 0.1.6
  type1_extract_file@Base 0.1.6
+ type1_get_file_link@Base 0.1.8
  type1_get_file_name@Base 0.1.6
  type1_read_file_into_buf@Base 0.1.6
  type1_traverse@Base 0.1.6
  type2_extract_file@Base 0.1.6
+ type2_get_file_link@Base 0.1.8
  type2_get_file_name@Base 0.1.6
  type2_read_file_into_buf@Base 0.1.6
  type2_traverse@Base 0.1.6
