@@ -1,6 +1,6 @@
 Source: libappimage
 Priority: optional
-Maintainer: Scarlett Moore <sgclark@kde.org>
+Maintainer: Scarlett Moore <sgmoore@kde.org>
 Build-Depends: cmake,
                debhelper (>= 12),
                desktop-file-utils,
