@@ -46,7 +46,6 @@ libappimage.so.0 libappimage0 #MINVER#
  dummy_extract_file@Base 0.1.6
  dummy_get_file_name@Base 0.1.6
  dummy_traverse_func@Base 0.1.6
- extract_appimage_file@Base 0.1.6
  extract_appimage_file_command@Base 0.1.6
  extract_appimage_file_name@Base 0.1.6
  extract_appimage_icon@Base 0.1.6
