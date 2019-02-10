@@ -1,4 +1,4 @@
-libappimage (0.1.9+dfsg-1) UNRELEASED; urgency=medium
+libappimage (0.1.9+dfsg-1) unstable; urgency=medium
 
   * Add a better description. (Closes: #921072)
   * New upstream releaase.
@@ -6,8 +6,9 @@ libappimage (0.1.9+dfsg-1) UNRELEASED; urgency=medium
   * Add --as-needed linker to avoid useless dependencies.
   * Add upstream patch to rid of build-path in binary, thus
     getting rid of lintian error.
+  * Release to unstable.
 
- -- Scarlett Moore <sgmoore@kde.org>  Thu, 07 Feb 2019 05:15:11 -0700
+ -- Scarlett Moore <sgmoore@kde.org>  Sun, 10 Feb 2019 06:08:27 -0700
 
 libappimage (0.1.8+dfsg-1) unstable; urgency=medium
 
