@@ -10,7 +10,7 @@ Build-Depends: cmake,
                libgtest-dev,
                liblzma-dev,
                libsquashfuse-dev,
-               xxd
+               xxd,
 Standards-Version: 4.3.0
 Section: libs
 Homepage: https://github.com/AppImage/libappimage
