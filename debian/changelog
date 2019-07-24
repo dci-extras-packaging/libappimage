@@ -1,3 +1,9 @@
+libappimage (1.0.2+dfsg-0neon) UNRELEASED; urgency=medium
+
+  * New release
+
+ -- Jonathan Riddell <jr@jriddell.org>  Wed, 24 Jul 2019 12:21:34 +0100
+
 libappimage (0.1.9+dfsg-1) unstable; urgency=medium
 
   * Add a better description. (Closes: #921072)
