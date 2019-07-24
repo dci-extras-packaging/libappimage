@@ -1,9 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: libappimage
 Source: https://github.com/AppImage/libappimage
-Files-Excluded:
-  lib/gtest
-Comment: Git submodule.
 
 Files: *
 Copyright: 2004-19 Simon Peter and the AppImage team
