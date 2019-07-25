@@ -9,8 +9,9 @@ Build-Depends: cmake,
                libglib2.0-dev,
                libgtest-dev,
                liblzma-dev,
+               librsvg2-dev,
                libsquashfuse-dev,
-               xxd,
+               xxd
 Standards-Version: 4.3.0
 Section: libs
 Homepage: https://github.com/AppImage/libappimage
