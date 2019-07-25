@@ -22,7 +22,10 @@ Package: libappimage-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libappimage0 (= ${binary:Version}), libcairo2-dev, ${misc:Depends}
+Depends: libappimage0 (= ${binary:Version}),
+         libcairo2-dev,
+         librsvg2-dev,
+         ${misc:Depends}
 Description: Development files for libappimage
  Core library of the AppImage project. Reference implementation
  of the AppImage specification. https://appimage.org
