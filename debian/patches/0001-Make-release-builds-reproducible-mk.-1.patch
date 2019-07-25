@@ -1,9 +1,0 @@
-From f73c293a493a7cc6f3fb7d1e713674abf563227c Mon Sep 17 00:00:00 2001
-From: TheAssassin <theassassin@assassinate-you.net>
-Date: Sun, 10 Feb 2019 04:00:11 +0100
-Subject: [PATCH] Make release builds reproducible, mk. 1
-
----
- CMakeLists.txt | 15 ++++++++++++++-
- 1 file changed, 14 insertions(+), 1 deletion(-)
-
