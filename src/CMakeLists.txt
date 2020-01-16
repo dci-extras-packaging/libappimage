@@ -18,11 +18,13 @@ add_subdirectory(libappimage)
 # (this registers the build-tree with a global CMake-registry)
 export(PACKAGE libappimage)
 
+include(CMakePackageConfigHelpers)
+
 # Create the AppImageConfig.cmake and AppImageConfigVersion files
-configure_file(
+configure_package_config_file(
     "${PROJECT_SOURCE_DIR}/cmake/libappimageConfig.cmake.in"
     "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/libappimageConfig.cmake"
-    @ONLY
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libappimage
 )
 # ... for both
 configure_file(
@@ -32,15 +34,27 @@ configure_file(
 )
 
 # Install the AppImageConfig.cmake and AppImageConfigVersion.cmake
-install(FILES
+install(
+    FILES
     "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libappimageConfig.cmake"
     "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/libappimageConfigVersion.cmake"
-    DESTINATION "lib/cmake/libappimage"
+    "${PROJECT_SOURCE_DIR}/cmake/scripts.cmake"
+    "${PROJECT_SOURCE_DIR}/cmake/imported_dependencies.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libappimage
     COMPONENT libappimage-dev
 )
 
 # Install the export set for use with the install-tree
-install(EXPORT libappimageTargets
-    DESTINATION "lib/cmake/libappimage"
+install(
+    EXPORT libappimageTargets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libappimage
+    COMPONENT libappimage-dev
+)
+
+# pkg-config
+configure_file("${PROJECT_SOURCE_DIR}/cmake/libappimage.pc.in" "${PROJECT_BINARY_DIR}/libappimage.pc" @ONLY)
+
+install(FILES "${PROJECT_BINARY_DIR}/libappimage.pc"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
     COMPONENT libappimage-dev
 )
