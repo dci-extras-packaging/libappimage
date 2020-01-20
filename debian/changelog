@@ -3,6 +3,8 @@ libappimage (1.0.2-1) unstable; urgency=medium
   * New upstream release. 
   * Add new build dependency to xdg-utils-cxx. 
   * Update VCS entries to new home under 3rd-party.
+  * Remove patch 0001-Make-release-builds-reproducible-mk.-1.patch,
+    it has been applied upstream.
 
  -- Scarlett Moore <sgmoore@kde.org>  Sun, 19 Jan 2020 19:40:58 -0700
 
