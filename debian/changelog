@@ -1,3 +1,9 @@
+libappimage (1.0.2-1) UNRELEASED; urgency=medium
+
+  * New upstream release. 
+
+ -- Scarlett Moore <sgmoore@kde.org>  Sun, 19 Jan 2020 19:39:40 -0700
+
 libappimage (0.1.9+dfsg-1) unstable; urgency=medium
 
   * Add a better description. (Closes: #921072)
