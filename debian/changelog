@@ -1,8 +1,9 @@
-libappimage (1.0.2-1) UNRELEASED; urgency=medium
+libappimage (1.0.2-1) unstable; urgency=medium
 
   * New upstream release. 
+  * Add new build dependency to xdg-utils-cxx. 
 
- -- Scarlett Moore <sgmoore@kde.org>  Sun, 19 Jan 2020 19:39:40 -0700
+ -- Scarlett Moore <sgmoore@kde.org>  Sun, 19 Jan 2020 19:40:58 -0700
 
 libappimage (0.1.9+dfsg-1) unstable; urgency=medium
 
