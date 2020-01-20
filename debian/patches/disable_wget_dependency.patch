@@ -5,10 +5,10 @@ Last-Update: 2019-01-11
 ---
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 ===================================================================
-Index: libappimage-1.0.2/cmake/tools.cmake
+Index: cmake/tools.cmake
 ===================================================================
---- libappimage-1.0.2.orig/cmake/tools.cmake	2019-01-06 11:53:44.612905996 +0000
-+++ libappimage-1.0.2/cmake/tools.cmake	2019-01-11 13:29:30.515685126 +0000
+--- cmake/tools.cmake	2019-01-06 11:53:44.612905996 +0000
++++ cmake/tools.cmake	2019-01-11 13:29:30.515685126 +0000
 @@ -50,7 +50,7 @@
  check_program(NAME libtoolize)
  check_program(NAME patch)
