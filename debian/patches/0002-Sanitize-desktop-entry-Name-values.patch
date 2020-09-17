@@ -1,0 +1,55 @@
+From 05fe95b178cee10bb41cbe02d8b7da576f2a3897 Mon Sep 17 00:00:00 2001
+From: TheAssassin <theassassin@assassinate-you.net>
+Date: Fri, 24 Jul 2020 07:25:22 +0200
+Subject: [PATCH] Sanitize desktop entry Name values
+Origin: upstream,https://github.com/AppImage/libappimage/commit/855238dab12f79e55235e05161750cc2d8aecf54
+
+The app names used to be embedded/appended to the target path without
+any checks. This allows for various attacks, as one can just put some
+prepared path names in there and thus make libappimage create files with
+unexpected filenames. This can lead to creating files with arbitrary
+names (even in arbitrary locations), which is not desirable at all.
+Ultimately, it might be possible to create desktop entries which pretend
+to be system applications, and have the user run code from malicious
+files which went through the AppImage integration process but pretend to
+be e.g., media files.
+
+This commit fixes the issue by sanitizing all app names before they are
+included in calculated paths. All "dangerous" characters are replaced by
+safe ones.
+---
+ .../desktop_integration/integrator/Integrator.cpp  | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/src/libappimage/desktop_integration/integrator/Integrator.cpp b/src/libappimage/desktop_integration/integrator/Integrator.cpp
+index 2c26ca3..3219867 100644
+--- a/src/libappimage/desktop_integration/integrator/Integrator.cpp
++++ b/src/libappimage/desktop_integration/integrator/Integrator.cpp
+@@ -120,16 +120,18 @@ namespace appimage {
+                 std::string buildDesktopFilePath() const {
+                     // Get application name
+                     if (!desktopEntry.exists("Desktop Entry/Name"))
+-                        throw IOError("Error while reading AppImage desktop file. Missing Name entry.");
++                        throw DesktopIntegrationError("Desktop file does not contain Name entry");
+ 
+-                    // scape application name to make a valid desktop file name part
+-                    std::string applicationNameScaped = desktopEntry.get("Desktop Entry/Name");
+-                    boost::trim(applicationNameScaped);
+-                    boost::replace_all(applicationNameScaped, " ", "_");
++                    // we don't trust the application name inside the desktop file, so we sanitize the filename before
++                    // calculating the integrated icon's path
++                    // this keeps the filename understandable while mitigating risks for potential attacks
++                    std::string sanitizedName = desktopEntry.get("Desktop Entry/Name");
++                    boost::trim(sanitizedName);
++                    sanitizedName = StringSanitizer(sanitizedName).sanitizeForPath();
+ 
+                     // assemble the desktop file path
+                     std::string desktopFileName =
+-                        VENDOR_PREFIX + "_" + appImageId + "-" + applicationNameScaped + ".desktop";
++                        VENDOR_PREFIX + "_" + appImageId + "-" + sanitizedName + ".desktop";
+                     bf::path expectedDesktopFilePath(xdgDataHome / "applications" / desktopFileName);
+ 
+                     return expectedDesktopFilePath.string();
+-- 
+2.28.0
+

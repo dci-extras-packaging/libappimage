@@ -1,2 +1,3 @@
+0002-Sanitize-desktop-entry-Name-values.patch
 disable_wget_dependency.patch
 0001-Make-release-builds-reproducible-mk.-1.patch
