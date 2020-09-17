@@ -1,3 +1,9 @@
+libappimage (1.0.3-0neon) focal; urgency=medium
+
+  * New release
+
+ -- Harald Sitter <sitter@kde.org>  Thu, 17 Sep 2020 14:29:45 +0200
+
 libappimage (1.0.2-0neon) focal; urgency=medium
 
   * New release
