@@ -1,1 +1,4 @@
 disable_wget_dependency.patch
+
+# random hack, not a backport but I've told upstream about the problem
+0001-make-c-11-standard-compliant.patch
