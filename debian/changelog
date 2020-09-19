@@ -1,10 +1,6 @@
 libappimage (0.1.9+dfsg-2) UNRELEASED; urgency=medium
 
 
-  [ Scarlett Moore ]
-  * Add upstream patch 0002-Sanitize-desktop-entry-Name-values.patch
-    to address security vulnerabilities.
-
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Thu, 17 Sep 2020 14:19:20 -0700
 
 libappimage (0.1.9+dfsg-1) unstable; urgency=medium
