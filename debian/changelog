@@ -1,3 +1,9 @@
+libappimage (1.0.3-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
+
 libappimage (0.1.9+dfsg-1) unstable; urgency=medium
 
  * Add a better description. (Closes: #921072)
