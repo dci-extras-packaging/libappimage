@@ -48,8 +48,14 @@ Package: libappimage1.0
 Architecture: any
 Multi-Arch: same
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Breaks: libappimage0 (<< 1.0.3-1)
-Replaces: libappimage0 (<< 1.0.3-1)
+Breaks: libappimage0 (= 1.0.2-0xneon+20.04+focal+build1),
+        libappimage0 (= 1.0.3-0xneon+20.04+focal+build3),
+        libappimage0 (= 1.0.3-0xneon+20.04+focal+build4),
+        libappimage0 (= 1.0.3-0xneon+20.04+focal+build5)
+Replaces: libappimage0 (= 1.0.2-0xneon+20.04+focal+build1),
+          libappimage0 (= 1.0.3-0xneon+20.04+focal+build3),
+          libappimage0 (= 1.0.3-0xneon+20.04+focal+build4),
+          libappimage0 (= 1.0.3-0xneon+20.04+focal+build5)
 Description: Core library for appimage
  Core library of the AppImage project. Reference implementation
  of the AppImage specification. https://appimage.org
