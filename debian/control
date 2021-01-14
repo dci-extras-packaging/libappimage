@@ -48,6 +48,8 @@ Package: libappimage1.0
 Architecture: any
 Multi-Arch: same
 Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: libappimage0 (<< 1.0.3-1)
+Replaces: libappimage0 (<< 1.0.3-1)
 Description: Core library for appimage
  Core library of the AppImage project. Reference implementation
  of the AppImage specification. https://appimage.org
@@ -68,3 +70,11 @@ Description: Core library for appimage
  and usage of appimages.
  .
  This package contains the library for libappimage.
+
+Package: libappimage0
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Priority: extra
+Section: oldlibs
+Description: Core library for appimage - transitional
+ This is a dummy transitional package which can be removed
