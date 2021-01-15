@@ -9,8 +9,14 @@ Build-Depends: cmake,
                libglib2.0-dev,
                libgtest-dev,
                liblzma-dev,
+               libboost-thread-dev,
+               libboost-filesystem-dev,
+               libboost-system-dev,
                libsquashfuse-dev,
+               pkg-config,
+               xdg-utils-cxx,
                xxd,
+               zlib1g-dev,
 Standards-Version: 4.3.0
 Section: libs
 Homepage: https://github.com/AppImage/libappimage

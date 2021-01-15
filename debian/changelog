@@ -1,6 +1,11 @@
 libappimage (1.0.3-1) UNRELEASED; urgency=medium
 
+  [ Debian Qt/KDE Maintainers ]
   * New upstream release.
+
+  [ Scarlett Moore ]
+  * Update dependencies as per cmake and configure cmake flags to use
+   system libraries.
 
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
 
