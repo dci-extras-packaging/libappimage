@@ -1,14 +1,21 @@
 libappimage (1.0.3-1) UNRELEASED; urgency=medium
 
-  [ Debian Qt/KDE Maintainers ]
+  [ Harald Sitter ]
   * New upstream release.
 
   [ Scarlett Moore ]
   * Update dependencies as per cmake and configure cmake flags to use
    system libraries.
   * Remove reproducible builds patch applied upstream.
+  * Merge KDE Neon Packaging. Thanks!
 
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
+
+libappimage (1.0.2-0neon) focal; urgency=medium
+
+  * New release
+
+ -- Jonathan Riddell <jr@jriddell.org>  Wed, 24 Jul 2019 12:21:34 +0100
 
 libappimage (0.1.9+dfsg-1) unstable; urgency=medium
 

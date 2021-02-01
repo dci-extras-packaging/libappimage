@@ -9,14 +9,9 @@ Build-Depends: cmake,
                libglib2.0-dev,
                libgtest-dev,
                liblzma-dev,
-               libboost-thread-dev,
-               libboost-filesystem-dev,
-               libboost-system-dev,
+               librsvg2-dev,
                libsquashfuse-dev,
-               pkg-config,
-               xdg-utils-cxx,
-               xxd,
-               zlib1g-dev,
+               xxd
 Standards-Version: 4.3.0
 Section: libs
 Homepage: https://github.com/AppImage/libappimage
@@ -27,7 +22,10 @@ Package: libappimage-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libappimage0 (= ${binary:Version}), ${misc:Depends}
+Depends: libappimage1.0 (= ${binary:Version}),
+         libcairo2-dev,
+         librsvg2-dev,
+         ${misc:Depends}
 Description: Development files for libappimage
  Core library of the AppImage project. Reference implementation
  of the AppImage specification. https://appimage.org
@@ -46,10 +44,12 @@ Description: Development files for libappimage
  .
  This package contains the development files for libappimage.
 
-Package: libappimage0
+Package: libappimage1.0
 Architecture: any
 Multi-Arch: same
 Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: libappimage0
+Replaces: libappimage0
 Description: Core library for appimage
  Core library of the AppImage project. Reference implementation
  of the AppImage specification. https://appimage.org
@@ -70,3 +70,11 @@ Description: Core library for appimage
  and usage of appimages.
  .
  This package contains the library for libappimage.
+
+Package: libappimage0
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Priority: extra
+Section: oldlibs
+Description: Core library for appimage - transitional
+ This is a dummy transitional package which can be removed
