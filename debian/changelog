@@ -8,6 +8,7 @@ libappimage (1.0.3-1) UNRELEASED; urgency=medium
    system libraries.
   * Remove reproducible builds patch applied upstream.
   * Merge KDE Neon Packaging. Thanks!
+  * Switch to debhelper-compat.
 
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
 
