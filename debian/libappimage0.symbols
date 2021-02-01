@@ -1,3 +1,4 @@
+# SymbolsHelper-Confirmed: 0.1.6 amd64
 libappimage.so.0 libappimage0 #MINVER#
 * Build-Depends-Package: libappimage-dev
  appimage_create_thumbnail@Base 0.1.6
