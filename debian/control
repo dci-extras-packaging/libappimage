@@ -82,7 +82,6 @@ Description: Core library for appimage
 Package: libappimage0
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Priority: extra
 Section: oldlibs
 Description: Core library for appimage - transitional
  This is a dummy transitional package which can be removed
