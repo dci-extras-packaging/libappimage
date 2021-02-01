@@ -30,13 +30,13 @@ libappimage (1.0.2-0neon) focal; urgency=medium
 
 libappimage (0.1.9+dfsg-1) unstable; urgency=medium
 
- * Add a better description. (Closes: #921072)
- * New upstream releaase.
- * Refresh symbols file.
- * Add --as-needed linker to avoid useless dependencies.
- * Add upstream patch to rid of build-path in binary, thus
+  * Add a better description. (Closes: #921072)
+  * New upstream releaase.
+  * Refresh symbols file.
+  * Add --as-needed linker to avoid useless dependencies.
+  * Add upstream patch to rid of build-path in binary, thus
  getting rid of lintian error.
- * Release to unstable.
+  * Release to unstable.
 
  -- Scarlett Moore <sgmoore@kde.org>  Sun, 10 Feb 2019 06:08:27 -0700
 
