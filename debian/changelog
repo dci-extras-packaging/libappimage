@@ -20,6 +20,7 @@ libappimage (1.0.3-1) UNRELEASED; urgency=medium
     - Remove obsolete entries already defined in d/copyright.
     - Add bug-database entry.
   * Remove Priority extras ( lintian ).
+  * Remove --as-needed flag as it is now default.
 
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
 
