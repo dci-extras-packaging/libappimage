@@ -10,7 +10,10 @@ libappimage (1.0.3-1) UNRELEASED; urgency=medium
   * Merge KDE Neon Packaging. Thanks!
   * Switch to debhelper-compat.
   * Update repo, moved to 3rdparty under kde umbrella.
-  * Add symbolshelper-confirmed header to symbols file.
+  * Update symbols file.
+    - Add symbolshelper-confirmed header to symbols file.
+    - Rename file to new 1.0 SO version.
+    - Update name in symbols file.
 
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
 
