@@ -1,28 +1,40 @@
 Source: libappimage
 Priority: optional
-Maintainer: Scarlett Moore <sgmoore@kde.org>
+Maintainer: Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>
+Uploaders: Scarlett Moore <sgmoore@kde.org>
 Build-Depends: cmake,
-               debhelper (>= 12),
+               debhelper-compat (= 13),
                desktop-file-utils,
                libarchive-dev,
                libcairo2-dev,
                libglib2.0-dev,
                libgtest-dev,
                liblzma-dev,
+               libboost-thread-dev,
+               libboost-filesystem-dev,
+               libboost-system-dev,
+               librsvg2-dev,
                libsquashfuse-dev,
+               pkg-config,
+               pkg-kde-tools,
                xdg-utils-cxx,
                xxd,
-Standards-Version: 4.3.0
+               zlib1g-dev,
+Standards-Version: 4.5.1
 Section: libs
 Homepage: https://github.com/AppImage/libappimage
 Vcs-Browser: https://salsa.debian.org/qt-kde-team/3rdparty/libappimage
-Vcs-Git: https://salsa.debian.org/qt-kde-team/3rdparty/libappimage
+Vcs-Git: https://salsa.debian.org/qt-kde-team/3rdparty/libappimage.git
+Rules-Requires-Root: no
 
 Package: libappimage-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libappimage0 (= ${binary:Version}), ${misc:Depends}
+Depends: libappimage1.0 (= ${binary:Version}),
+         libcairo2-dev,
+         librsvg2-dev,
+         ${misc:Depends}
 Description: Development files for libappimage
  Core library of the AppImage project. Reference implementation
  of the AppImage specification. https://appimage.org
@@ -41,10 +53,12 @@ Description: Development files for libappimage
  .
  This package contains the development files for libappimage.
 
-Package: libappimage0
+Package: libappimage1.0
 Architecture: any
 Multi-Arch: same
 Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: libappimage0 (<< 0.1.9+dfsg-1)
+Replaces: libappimage0 (<< 0.1.9+dfsg-1)
 Description: Core library for appimage
  Core library of the AppImage project. Reference implementation
  of the AppImage specification. https://appimage.org
@@ -65,3 +79,10 @@ Description: Core library for appimage
  and usage of appimages.
  .
  This package contains the library for libappimage.
+
+Package: libappimage0
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Section: oldlibs
+Description: Core library for appimage - transitional
+ This is a dummy transitional package which can be removed

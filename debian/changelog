@@ -1,13 +1,41 @@
-libappimage (1.0.2-1) unstable; urgency=medium
+libappimage (1.0.3-1) UNRELEASED; urgency=medium
 
-  * New upstream release. 
-  * Add new build dependency to xdg-utils-cxx. 
-  * Update VCS entries to new home under 3rd-party.
-  * Remove patch 0001-Make-release-builds-reproducible-mk.-1.patch,
-    it has been applied upstream.
-  * Fix versions in wget disable patch.
+  [ Harald Sitter ]
+  * New upstream release.
 
- -- Scarlett Moore <sgmoore@kde.org>  Sun, 19 Jan 2020 19:40:58 -0700
+  [ Scarlett Moore ]
+  * Update dependencies as per cmake and configure cmake flags to use
+   system libraries.
+  * Remove reproducible builds patch applied upstream.
+  * Merge KDE Neon Packaging. Thanks!
+  * Switch to debhelper-compat.
+  * Update repo, moved to 3rdparty under kde umbrella.
+  * Update symbols file.
+    - Add symbolshelper-confirmed header to symbols file.
+    - Rename file to new 1.0 SO version.
+    - Update name in symbols file.
+    - update new symbols / remove missing ( new SO version ).
+  * Add rules-requires-root: no in d/control.
+  * Update d/upstream/metadata.
+    - Remove obsolete entries already defined in d/copyright.
+    - Add bug-database entry.
+  * Remove Priority extras ( lintian ).
+  * Remove --as-needed flag as it is now default.
+  * Bump Standards to 4.5.1; no changes.
+  * Change to team maintainer.
+  * Add googletest test dependency.
+  * Add override to dh_clean to clean up test data.
+  * Refresh copyright.
+    - Add upstream-contact field.
+    - Update file.
+
+ -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
+
+libappimage (1.0.2-0neon) focal; urgency=medium
+
+  * New release
+
+ -- Jonathan Riddell <jr@jriddell.org>  Wed, 24 Jul 2019 12:21:34 +0100
 
 libappimage (0.1.9+dfsg-1) unstable; urgency=medium
 
@@ -16,7 +44,7 @@ libappimage (0.1.9+dfsg-1) unstable; urgency=medium
   * Refresh symbols file.
   * Add --as-needed linker to avoid useless dependencies.
   * Add upstream patch to rid of build-path in binary, thus
-    getting rid of lintian error.
+ getting rid of lintian error.
   * Release to unstable.
 
  -- Scarlett Moore <sgmoore@kde.org>  Sun, 10 Feb 2019 06:08:27 -0700
