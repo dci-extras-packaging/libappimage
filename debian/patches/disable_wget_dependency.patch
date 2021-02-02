@@ -8,8 +8,8 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 
 Index: packaging/libappimage/cmake/tools.cmake
 ===================================================================
---- packaging/libappimage.orig/cmake/tools.cmake
-+++ packaging/libappimage/cmake/tools.cmake
+--- cmake/tools.cmake
++++ cmake/tools.cmake
 @@ -50,7 +50,7 @@ check_program(NAME autoreconf)
  check_program(NAME libtoolize)
  check_program(NAME patch)
