@@ -1,6 +1,7 @@
 Source: libappimage
 Priority: optional
-Maintainer: Scarlett Moore <sgmoore@kde.org>
+Maintainer: Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>
+Uploaders: Scarlett Moore <sgmoore@kde.org>
 Build-Depends: cmake,
                debhelper-compat (= 13),
                desktop-file-utils,
