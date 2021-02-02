@@ -23,8 +23,8 @@ Build-Depends: cmake,
 Standards-Version: 4.5.1
 Section: libs
 Homepage: https://github.com/AppImage/libappimage
-Vcs-Browser: https://salsa.debian.org/3rdparty/libappimage
-Vcs-Git: https://salsa.debian.org/3rdparty/libappimage.git
+Vcs-Browser: https://salsa.debian.org/qt-kde-team/3rdparty/libappimage
+Vcs-Git: https://salsa.debian.org/qt-kde-team/3rdparty/libappimage.git
 Rules-Requires-Root: no
 
 Package: libappimage-dev
