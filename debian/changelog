@@ -24,6 +24,7 @@ libappimage (1.0.3-1) UNRELEASED; urgency=medium
   * Bump Standards to 4.5.1; no changes.
   * Change to team maintainer.
   * Add googletest test dependency.
+  * Add override to dh_clean to clean up test data.
 
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
 

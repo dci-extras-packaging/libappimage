@@ -15,3 +15,7 @@ override_dh_auto_configure:
 
 override_dh_missing:
 	 dh_missing --fail-missing
+
+override_dh_clean:
+	 rm -rf $(CURDIR)/tests/data
+	 dh_clean
