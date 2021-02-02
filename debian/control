@@ -3,7 +3,7 @@ Priority: optional
 Maintainer: Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>
 Uploaders: Scarlett Moore <sgmoore@kde.org>
 Build-Depends: cmake,
-               debhelper-compat (= 13),
+               debhelper-compat (= 12),
                desktop-file-utils,
                libarchive-dev,
                libcairo2-dev,
