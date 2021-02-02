@@ -21,6 +21,7 @@ libappimage (1.0.3-1) UNRELEASED; urgency=medium
     - Add bug-database entry.
   * Remove Priority extras ( lintian ).
   * Remove --as-needed flag as it is now default.
+  * Bump Standards to 4.5.1; no changes. 
 
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
 
