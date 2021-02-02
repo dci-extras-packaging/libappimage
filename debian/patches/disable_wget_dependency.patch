@@ -5,11 +5,10 @@ Last-Update: 2019-01-11
 ---
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 ===================================================================
-
-Index: packaging/libappimage/cmake/tools.cmake
-===================================================================
---- cmake/tools.cmake
-+++ cmake/tools.cmake
+diff --git a/cmake/tools.cmake b/cmake/tools.cmake
+index d0941bb..3180b48 100644
+--- a/cmake/tools.cmake
++++ b/cmake/tools.cmake
 @@ -50,7 +50,7 @@ check_program(NAME autoreconf)
  check_program(NAME libtoolize)
  check_program(NAME patch)
