@@ -25,6 +25,9 @@ libappimage (1.0.3-1) UNRELEASED; urgency=medium
   * Change to team maintainer.
   * Add googletest test dependency.
   * Add override to dh_clean to clean up test data.
+  * Refresh copyright.
+    - Add upstream-contact field.
+    - Update file.
 
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
 
