@@ -34,6 +34,7 @@ Multi-Arch: same
 Depends: libappimage1.0 (= ${binary:Version}),
          libcairo2-dev,
          librsvg2-dev,
+         xdg-utils-cxx,
          ${misc:Depends}
 Description: Development files for libappimage
  Core library of the AppImage project. Reference implementation
