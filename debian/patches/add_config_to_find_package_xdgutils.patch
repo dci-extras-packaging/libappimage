@@ -1,0 +1,21 @@
+From c6b7df5d4e78cbe0fd5138a75ffae0a6c44d8118 Mon Sep 17 00:00:00 2001
+From: Scarlett Moore <sgmoore@kde.org>
+Date: Wed, 3 Feb 2021 13:17:58 -0700
+Subject: iAAdd CONFIG to find_package so when an external entity uses the
+ lilibrary the target is properly added and thus avoiding linking issues.
+
+
+diff --git a/cmake/dependencies.cmake b/cmake/dependencies.cmake
+index 5aed8bd..decc8f8 100644
+--- a/cmake/dependencies.cmake
++++ b/cmake/dependencies.cmake
+@@ -185,7 +185,9 @@ endif()
+ ## XdgUtils
+ 
+ if(USE_SYSTEM_XDGUTILS)
+-    find_package(XdgUtils REQUIRED COMPONENTS DesktopEntry BaseDir)
++    find_package(XdgUtils CONFIG REQUIRED COMPONENTS DesktopEntry BaseDir)
++    import_library_from_prefix(XdgUtils::DesktopEntry XdgUtils)
++    import_library_from_prefix(XdgUtils::BaseDir XdgUtils)
+ else()
+     message(STATUS "Downloading and building XdgUtils")
