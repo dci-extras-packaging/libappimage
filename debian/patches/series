@@ -1,4 +1,4 @@
 disable_wget_dependency.patch
+add_config_to_find_package_xdgutils.patch
 # backport
 0001-Make-string-sanitizer-strictly-C-11.patch
-
