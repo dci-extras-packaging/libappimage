@@ -1,10 +1,10 @@
 #!/usr/bin/make -f
 # See debhelper(7) (uncomment to enable)
 # output every command that modifies files on the build system.
-#export DH_VERBOSE = 1
-
+#[;[;
+export DH_VERBOSE = 1
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
-
+export DEB_DH_SHLIBDEPS_ARGS_ALL=--dpkg-shlibdeps-params=--ignore-missing-info -l/usr/include/XdgUtils/BaseDir -l/usr/include/XdgUtils/DesktopEntry -l/usr/lib/$(DEB_HOST_MULTIARCH)/XdgUtils
 %:
 	dh $@ --with pkgkde-symbolshelper
 
@@ -15,9 +15,6 @@ override_dh_auto_configure:
 
 override_dh_missing:
 	 dh_missing --fail-missing
-
-override_dh_shlibdeps:
-	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info -lXdgUtils
 
 override_dh_clean:
 	 rm -rf $(CURDIR)/tests/data
