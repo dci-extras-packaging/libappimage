@@ -1,0 +1,20 @@
+From f34aec94559756d2fdfa0b498029b83e5d778fe7 Mon Sep 17 00:00:00 2001
+From: Scarlett Moore <sgmoore@kde.org>
+Date: Fri, 5 Feb 2021 18:09:16 -0700
+Subject: Add xdgutils targets.
+
+diff --git a/cmake/libappimageConfig.cmake.in b/cmake/libappimageConfig.cmake.in
+index 29b8238..c6d0fee 100644
+--- a/cmake/libappimageConfig.cmake.in
++++ b/cmake/libappimageConfig.cmake.in
+@@ -12,6 +12,10 @@
+ # Compute paths
+ get_filename_component(LIBAPPIMAGE_CMAKE_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
+ 
++#For targets not using pkg-config... eg. xdgutils
++include(CMakeFindDependencyMacro)
++
++find_dependency(XdgUtils 0.1.1 REQUIRED COMPONENTS DesktopEntry BaseDir)
+ # Import dependencies implicitly required by libappimageTargets.cmake
+ include(${LIBAPPIMAGE_CMAKE_DIR}/imported_dependencies.cmake)
+ 
