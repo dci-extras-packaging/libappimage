@@ -1,4 +1,5 @@
 disable_wget_dependency.patch
+update_cmake_to_look_for_dependency_targets.patch
 # backport
 0001-Make-string-sanitizer-strictly-C-11.patch
 
