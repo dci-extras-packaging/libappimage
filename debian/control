@@ -17,7 +17,7 @@ Build-Depends: cmake,
                libsquashfuse-dev,
                pkg-config,
                pkg-kde-tools,
-               xdg-utils-cxx,
+               xdg-utils-cxx-dev,
                xxd,
                zlib1g-dev,
 Standards-Version: 4.5.1
@@ -34,7 +34,7 @@ Multi-Arch: same
 Depends: libappimage1.0 (= ${binary:Version}),
          libcairo2-dev,
          librsvg2-dev,
-         xdg-utils-cxx,
+         ${shlibs:Depends},
          ${misc:Depends}
 Description: Development files for libappimage
  Core library of the AppImage project. Reference implementation
