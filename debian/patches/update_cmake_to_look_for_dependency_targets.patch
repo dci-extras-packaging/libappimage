@@ -1,32 +1,20 @@
 From fbbabbdcf3c466a506fbd6ec95d9e9a8c9f96830 Mon Sep 17 00:00:00 2001
-Description: #For targets not using pkg-config... and USE_SYSTEM_{DEPENDENCY} is true eg. xdgutils \
-#find_dependency needs to be used as when clients (aka appimagelauncher) try to use this library we get linking failure
-#because the dependencies of the dependency(libappimnage) targets are not imported. Hope this makes sence.
-#Builds fine in debian and appimagelauncher no longer has linking failures.
-Author: Scarlett Moore <sgmoore@kde.org>
+From: Scarlett Moore <sgmoore@kde.org>
 Date: Sat, 6 Feb 2021 09:31:51 -0700
 Subject: Client builds fail at linking due to missing targets when
  USE_SYSTEM_LIBRARY is true.
 Forwarded: https://github.com/AppImage/libappimage/pull/152
 
+#For targets not using pkg-config... and USE_SYSTEM_{DEPENDENCY} is true eg. xdgutils \
+#find_dependency needs to be used as when clients (aka appimagelauncher) try to use this library we get linking failure
+#because the dependencies of the dependency(libappimnage) targets are not imported. Hope this makes sence.
+#Builds fine in debian and appimagelauncher no longer has linking failures.
 
-diff --git a/cmake/dependencies.cmake b/cmake/dependencies.cmake
-index 5aed8bd..e54a952 100644
---- a/cmake/dependencies.cmake
-+++ b/cmake/dependencies.cmake
-@@ -184,6 +184,7 @@ endif()
- 
- ## XdgUtils
- 
-+set(USE_SYSTEM_XDGUTILS OFF CACHE BOOL "Use system xdgutils instead of building our own")
- if(USE_SYSTEM_XDGUTILS)
-     find_package(XdgUtils REQUIRED COMPONENTS DesktopEntry BaseDir)
- else()
 diff --git a/cmake/libappimageConfig.cmake.in b/cmake/libappimageConfig.cmake.in
-index 29b8238..599fbde 100644
+index 29b8238..4776377 100644
 --- a/cmake/libappimageConfig.cmake.in
 +++ b/cmake/libappimageConfig.cmake.in
-@@ -15,6 +15,16 @@ get_filename_component(LIBAPPIMAGE_CMAKE_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
+@@ -15,6 +15,14 @@ get_filename_component(LIBAPPIMAGE_CMAKE_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
  # Import dependencies implicitly required by libappimageTargets.cmake
  include(${LIBAPPIMAGE_CMAKE_DIR}/imported_dependencies.cmake)
  
@@ -34,11 +22,9 @@ index 29b8238..599fbde 100644
 +#find_dependency needs to be used as when clients (aka appimagelauncher) try to use this library we get linking failure 
 +#because the dependencies of the dependency(libappimnage) targets are not imported. Hope this makes sence.
 +#Builds fine in debian and appimagelauncher no longer has linking failures.
-+if(${USE_SYSTEM_XDGUTILS})
 +include(CMakeFindDependencyMacro)
 +
 +find_dependency(XdgUtils 0.1.1 REQUIRED COMPONENTS DesktopEntry BaseDir)
-+endif
 +
  # Our library dependencies (contains definitions for IMPORTED targets)
  include(${LIBAPPIMAGE_CMAKE_DIR}/libappimageTargets.cmake)
