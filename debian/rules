@@ -6,7 +6,7 @@
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 %:
-	dh $@ --with pkgkde-symbolshelper
+	dh $@ --with pkgkde_symbolshelper
 
 override_dh_auto_configure:
 	dh_auto_configure -- -DUSE_SYSTEM_XZ=ON -DUSE_SYSTEM_LIBARCHIVE=ON \
