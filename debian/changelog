@@ -28,8 +28,7 @@ libappimage (1.0.3-1) UNRELEASED; urgency=medium
   * Refresh copyright.
     - Add upstream-contact field.
     - Update file.
-  * Add patch to fix linking issues with clients of this library.
-    See patch for details, upstreamed.
+  * Using the library fails without runtime depend to xdg-utils-cxx.
 
  -- Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>  Wed, 13 Jan 2021 20:29:19 -0700
 
